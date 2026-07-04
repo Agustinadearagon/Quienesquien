@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#0d1b2a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>¿Quién es Quién?</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icon-192.png"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --fondo:      #0d1b2a;
+      --tablero:    #1a3a5c;
+      --acento:     #e8b84b;
+      --blanco:     #ffffff;
+      --tarjeta:    #f5efe6;
+      --eliminada:  #5c1a1a;
+      --verde:      #2ecc71;
+      --rojo:       #e74c3c;
+      --texto:      #1a1a2a;
+      --gris:       #aabbcc;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--fondo);
+      color: var(--blanco);
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── Pantallas ── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .screen.active { display: flex; }
+
+    /* ── MENÚ ── */
+    #menu { overflow-y: auto; }
+
+    .menu-header {
+      background: var(--tablero);
+      padding: 20px 16px 16px;
+      text-align: center;
+    }
+    .menu-header h1 {
+      font-size: clamp(20px, 5vw, 28px);
+      color: var(--acento);
+      letter-spacing: 1px;
+    }
+    .menu-header p {
+      font-size: 13px;
+      color: var(--gris);
+      margin-top: 6px;
+    }
+
+    #stats-menu {
+      text-align: center;
+      font-size: 13px;
+      color: var(--gris);
+      padding: 10px;
+      border-bottom: 1px solid #334466;
+    }
+
+    .como-jugar {
+      padding: 12px 20px;
+    }
+    .como-jugar h2 {
+      font-size: 15px;
+      color: var(--acento);
+      margin-bottom: 8px;
+    }
+    .paso {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+    .paso-num {
+      background: var(--acento);
+      color: var(--texto);
+      font-size: 12px;
+      font-weight: bold;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .paso p { font-size: 13px; color: #ccddee; line-height: 1.4; }
+
+    .sep { height: 1px; background: #334466; margin: 12px 20px; }
+
+    .btn {
+      display: block;
+      width: calc(100% - 40px);
+      margin: 6px 20px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn:active { opacity: .8; }
+    .btn-acento { background: var(--acento); color: var(--texto); }
+    .btn-tablero { background: var(--tablero); color: var(--blanco); }
+    .btn-verde { background: var(--verde); color: var(--blanco); }
+    .btn-rojo  { background: var(--rojo);  color: var(--blanco); }
+    .btn-gris  { background: #334466; color: var(--blanco); }
+    .btn-sm { font-size: 13px; padding: 10px; }
+
+    /* ── JUEGO ── */
+    #juego { display: none; }
+
+    .juego-header {
+      background: var(--tablero);
+      padding: 8px 12px 6px;
+      flex-shrink: 0;
+    }
+    .juego-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .juego-top button {
+      background: none;
+      border: none;
+      color: var(--blanco);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    #lbl-secreto {
+      font-size: 12px;
+      color: var(--acento);
+      font-weight: bold;
+      flex: 1;
+      text-align: center;
+    }
+    #lbl-candidatos {
+      font-size: 11px;
+      color: var(--gris);
+      white-space: nowrap;
+    }
+    #lbl-turno {
+      font-size: 13px;
+      text-align: center;
+      padding: 3px 0 1px;
+      font-weight: bold;
+    }
+
+    /* ── Tablero ── */
+    #tablero-wrap {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--tablero);
+      padding: 4px;
+    }
+
+    #tablero {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+    }
+
+    .tarjeta {
+      background: var(--tarjeta);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 2px 3px;
+      cursor: pointer;
+      border: 2px solid var(--acento);
+      transition: transform .1s;
+      position: relative;
+      aspect-ratio: 3/4;
+      user-select: none;
+    }
+    .tarjeta:active { transform: scale(.95); }
+
+    .tarjeta.eliminada {
+      background: var(--eliminada);
+      border-color: #6a3030;
+      opacity: .7;
+    }
+    .tarjeta .emoji {
+      font-size: clamp(18px, 5vw, 28px);
+      line-height: 1;
+    }
+    .tarjeta .nombre {
+      font-size: clamp(7px, 2vw, 10px);
+      color: var(--texto);
+      font-weight: bold;
+      margin-top: 2px;
+      text-align: center;
+    }
+    .tarjeta.eliminada .nombre { color: #cc6666; }
+
+    .tarjeta .cruz {
+      display: none;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .tarjeta.eliminada .cruz { display: block; }
+    .tarjeta .cruz::before,
+    .tarjeta .cruz::after {
+      content: '';
+      position: absolute;
+      background: #cc4444;
+      width: 100%;
+      height: 3px;
+      top: 50%;
+      left: 0;
+      border-radius: 2px;
+    }
+    .tarjeta .cruz::before { transform: rotate(45deg); }
+    .tarjeta .cruz::after  { transform: rotate(-45deg); }
+
+    /* ── Panel inferior ── */
+    .panel {
+      display: none;
+      flex-direction: column;
+      background: var(--fondo);
+      padding: 8px 12px 10px;
+      flex-shrink: 0;
+      border-top: 2px solid var(--tablero);
+    }
+    .panel.visible { display: flex; }
+
+    .panel label {
+      font-size: 12px;
+      color: var(--acento);
+      margin-bottom: 4px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #1e3a5c;
+      color: var(--blanco);
+      font-size: 14px;
+      margin-bottom: 8px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23e8b84b' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    select:focus { outline: none; }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+    .btn-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    /* ── Popup respuesta ── */
+    #popup {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    #popup.visible { display: flex; }
+    .popup-inner {
+      border-radius: 16px;
+      padding: 28px 24px 20px;
+      width: min(90vw, 360px);
+      text-align: center;
+    }
+    .popup-inner .pop-pregunta {
+      font-size: 15px;
+      color: rgba(255,255,255,.85);
+      margin-bottom: 10px;
+    }
+    .popup-inner .pop-resp {
+      font-size: 42px;
+      font-weight: bold;
+      color: var(--blanco);
+      margin-bottom: 20px;
+    }
+    .popup-inner button {
+      padding: 12px 32px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,.2);
+      color: var(--blanco);
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* ── RESULTADO ── */
+    #resultado {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 30px 24px;
+      gap: 12px;
+    }
+    #res-emoji { font-size: 72px; }
+    #res-titulo { font-size: 22px; font-weight: bold; }
+    #res-sub { font-size: 14px; color: var(--gris); line-height: 1.5; }
+    .res-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ MENÚ ══════════════ -->
+<div id="menu" class="screen active">
+  <div class="menu-header">
+    <h1>🕵️ ¿Quién es Quién?</h1>
+    <p>Adivina el personaje de la IA antes de que ella adivine el tuyo</p>
+  </div>
+
+  <div id="stats-menu">Sin partidas aún</div>
+
+  <div class="como-jugar">
+    <h2>Cómo jugar</h2>
+    <div class="paso"><div class="paso-num">1</div><p>La app elige un personaje secreto para cada uno</p></div>
+    <div class="paso"><div class="paso-num">2</div><p>Ves tu tablero con las 24 caras</p></div>
+    <div class="paso"><div class="paso-num">3</div><p>Elige una pregunta del desplegable y pulsa Preguntar</p></div>
+    <div class="paso"><div class="paso-num">4</div><p>Toca las caras para eliminarlas del tablero</p></div>
+    <div class="paso"><div class="paso-num">5</div><p>Cuando estés seguro, pulsa Adivinar</p></div>
+  </div>
+
+  <div class="sep"></div>
+  <button class="btn btn-acento" onclick="nuevaPartida()">▶ JUGAR</button>
+  <div style="height:16px"></div>
+</div>
+
+<!-- ══════════════ JUEGO ══════════════ -->
+<div id="juego" class="screen">
+
+  <div class="juego-header">
+    <div class="juego-top">
+      <button onclick="irA('menu')" title="Menú">🏠</button>
+      <div id="lbl-secreto">—</div>
+      <div id="lbl-candidatos">IA: 24</div>
+    </div>
+    <div id="lbl-turno"></div>
+  </div>
+
+  <div id="tablero-wrap">
+    <div id="tablero"></div>
+  </div>
+
+  <!-- Panel: turno jugador -->
+  <div id="panel-preg" class="panel visible">
+    <label>Tu pregunta:</label>
+    <select id="sel-preg"></select>
+    <div class="btn-row">
+      <button class="btn btn-tablero btn-sm" onclick="jugadorPregunta()">❓ Preguntar</button>
+      <button class="btn btn-sm" style="background:#7b3f00;color:#fff" onclick="mostrarPanel('adiv')">🎯 Adivinar</button>
+      <button class="btn btn-gris btn-sm" style="font-size:11px" onclick="levantarTodo()">↩ Levantar</button>
+    </div>
+  </div>
+
+  <!-- Panel: adivinar -->
+  <div id="panel-adiv" class="panel">
+    <label>¿Quién es el personaje de la IA?</label>
+    <select id="sel-adiv"></select>
+    <div class="btn-row-2">
+      <button class="btn btn-verde btn-sm" onclick="jugadorAdivina()">✅ ¡Es este!</button>
+      <button class="btn btn-gris btn-sm" onclick="mostrarPanel('preg')">← Volver</button>
+    </div>
+  </div>
+
+  <!-- Panel: turno IA -->
+  <div id="panel-ia" class="panel">
+    <label>🤖 La IA pregunta:</label>
+    <div id="lbl-preg-ia" style="font-size:17px;font-weight:bold;margin:8px 0 14px;text-align:center"></div>
+    <div class="btn-row-2">
+      <button class="btn btn-verde" onclick="responderIA(true)">✅ Sí</button>
+      <button class="btn btn-rojo"  onclick="responderIA(false)">❌ No</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ RESULTADO ══════════════ -->
+<div id="resultado" class="screen">
+  <div id="res-emoji"></div>
+  <div id="res-titulo"></div>
+  <div id="res-sub"></div>
+  <div class="sep" style="width:100%"></div>
+  <div class="res-btns">
+    <button class="btn btn-acento" onclick="nuevaPartida()">🔄 Revancha</button>
+    <button class="btn btn-gris"   onclick="irA('menu')">🏠 Menú</button>
+  </div>
+</div>
+
+<!-- ══════════════ POPUP RESPUESTA ══════════════ -->
+<div id="popup">
+  <div class="popup-inner" id="popup-inner">
+    <div class="pop-pregunta" id="pop-preg"></div>
+    <div class="pop-resp"     id="pop-resp"></div>
+    <button onclick="cerrarPopup()">OK →</button>
+  </div>
+</div>
+
+<script>
+// ── Datos ────────────────────────────────────────────────────────────────────
+const PERSONAJES = [
+  {n:"Alex",    e:"👦", mujer:0,calvo:0,pb:0,pr:0,pp:0,pc:1,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Alfred",  e:"👨", mujer:0,calvo:0,pb:0,pr:0,pp:1,pc:0,gafas:0,barba:0,bigote:1,sombrero:0,azules:1},
+  {n:"Anita",   e:"👱‍♀️",mujer:1,calvo:0,pb:0,pr:1,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:1},
+  {n:"Bernard", e:"👴", mujer:0,calvo:1,pb:0,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Bill",    e:"👦", mujer:0,calvo:0,pb:0,pr:1,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Claire",  e:"👩", mujer:1,calvo:0,pb:0,pr:0,pp:1,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:1},
+  {n:"David",   e:"🧔", mujer:0,calvo:1,pb:0,pr:0,pp:0,pc:0,gafas:0,barba:1,bigote:0,sombrero:0,azules:1},
+  {n:"Eric",    e:"👴", mujer:0,calvo:0,pb:1,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:1},
+  {n:"Felipe",  e:"🧓", mujer:0,calvo:0,pb:1,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:1,sombrero:1,azules:1},
+  {n:"Franz",   e:"👨", mujer:0,calvo:1,pb:0,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:1,sombrero:0,azules:0},
+  {n:"George",  e:"👦", mujer:0,calvo:0,pb:0,pr:1,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:1},
+  {n:"Herman",  e:"👴", mujer:0,calvo:0,pb:1,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"José",    e:"🧓", mujer:0,calvo:1,pb:0,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:1,sombrero:0,azules:1},
+  {n:"Maria",   e:"👩", mujer:1,calvo:0,pb:0,pr:0,pp:1,pc:0,gafas:0,barba:0,bigote:0,sombrero:1,azules:0},
+  {n:"Max",     e:"👴", mujer:0,calvo:1,pb:0,pr:0,pp:0,pc:0,gafas:1,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Mia",     e:"👩", mujer:1,calvo:0,pb:0,pr:1,pp:0,pc:0,gafas:1,barba:0,bigote:0,sombrero:0,azules:1},
+  {n:"Miguel",  e:"👦", mujer:0,calvo:0,pb:0,pr:0,pp:0,pc:1,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Molly",   e:"👩", mujer:1,calvo:0,pb:0,pr:1,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:1,azules:0},
+  {n:"Nuria",   e:"👩", mujer:1,calvo:0,pb:0,pr:0,pp:0,pc:1,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Paul",    e:"👴", mujer:0,calvo:0,pb:1,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:1},
+  {n:"Pedro",   e:"👦", mujer:0,calvo:0,pb:0,pr:0,pp:0,pc:1,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Philip",  e:"👨", mujer:0,calvo:0,pb:0,pr:0,pp:0,pc:1,gafas:1,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Richard", e:"👨", mujer:0,calvo:0,pb:0,pr:0,pp:1,pc:0,gafas:1,barba:0,bigote:1,sombrero:0,azules:1},
+  {n:"Susan",   e:"👩", mujer:1,calvo:0,pb:1,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+];
+
+const PREGUNTAS = [
+  {txt:"¿Es mujer?",               attr:"mujer"},
+  {txt:"¿Es calvo/a?",             attr:"calvo"},
+  {txt:"¿Tiene el pelo blanco?",   attr:"pb"},
+  {txt:"¿Tiene el pelo rubio?",    attr:"pr"},
+  {txt:"¿Tiene el pelo pelirrojo?",attr:"pp"},
+  {txt:"¿Tiene el pelo castaño?",  attr:"pc"},
+  {txt:"¿Lleva gafas?",            attr:"gafas"},
+  {txt:"¿Tiene barba?",            attr:"barba"},
+  {txt:"¿Tiene bigote?",           attr:"bigote"},
+  {txt:"¿Lleva sombrero?",         attr:"sombrero"},
+  {txt:"¿Tiene los ojos azules?",  attr:"azules"},
+];
+
+// ── Estado ───────────────────────────────────────────────────────────────────
+let miSecreto, iaSecreto, miTablero, iaCandidatos, iaHechas;
+let turno, partidaActiva, winsJ = 0, winsIA = 0;
+let popupCallback = null;
+let iaPregActual  = null;
+
+// ── Navegación ────────────────────────────────────────────────────────────────
+function irA(dest) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(dest).classList.add('active');
+  if (dest === 'menu') actualizarStatsMenu();
+}
+
+// ── MENÚ ─────────────────────────────────────────────────────────────────────
+function actualizarStatsMenu() {
+  const total = winsJ + winsIA;
+  document.getElementById('stats-menu').textContent =
+    total === 0 ? 'Sin partidas aún'
+                : `Partidas: ${total}   🧑 Tú: ${winsJ}   🤖 IA: ${winsIA}`;
+}
+
+// ── Selectores ────────────────────────────────────────────────────────────────
+function poblarSelectores() {
+  const sp = document.getElementById('sel-preg');
+  sp.innerHTML = PREGUNTAS.map(p => `<option value="${p.attr}">${p.txt}</option>`).join('');
+
+  const sa = document.getElementById('sel-adiv');
+  sa.innerHTML = PERSONAJES.map(p => `<option value="${p.n}">${p.e} ${p.n}</option>`).join('');
+}
+
+// ── Nueva partida ─────────────────────────────────────────────────────────────
+function nuevaPartida() {
+  miSecreto    = PERSONAJES[Math.floor(Math.random() * PERSONAJES.length)];
+  iaSecreto    = PERSONAJES[Math.floor(Math.random() * PERSONAJES.length)];
+  miTablero    = PERSONAJES.map(p => ({ p, activa: true }));
+  iaCandidatos = [...PERSONAJES];
+  iaHechas     = new Set();
+  turno        = 'jugador';
+  partidaActiva = true;
+
+  document.getElementById('lbl-secreto').textContent =
+    `Tu personaje: ${miSecreto.e} ${miSecreto.n}`;
+  actualizarCandidatosLabel();
+  actualizarTurnoLabel();
+  poblarSelectores();
+  dibujarTablero();
+  mostrarPanel('preg');
+  irA('juego');
+}
+
+// ── Tablero ───────────────────────────────────────────────────────────────────
+function dibujarTablero() {
+  const el = document.getElementById('tablero');
+  el.innerHTML = miTablero.map((e, i) => `
+    <div class="tarjeta ${e.activa ? '' : 'eliminada'}" onclick="toggleTarjeta(${i})">
+      <div class="emoji">${e.p.e}</div>
+      <div class="nombre">${e.p.n}</div>
+      <div class="cruz"></div>
+    </div>
+  `).join('');
+}
+
+function toggleTarjeta(i) {
+  if (!partidaActiva) return;
+  miTablero[i].activa = !miTablero[i].activa;
+  dibujarTablero();
+}
+
+function levantarTodo() {
+  miTablero.forEach(e => e.activa = true);
+  dibujarTablero();
+}
+
+// ── Paneles ───────────────────────────────────────────────────────────────────
+function mostrarPanel(cual) {
+  ['preg','adiv','ia'].forEach(id =>
+    document.getElementById('panel-'+id).classList.remove('visible'));
+  document.getElementById('panel-'+cual).classList.add('visible');
+}
+
+// ── Labels ───────────────────────────────────────────────────────────────────
+function actualizarTurnoLabel() {
+  const el = document.getElementById('lbl-turno');
+  if (turno === 'jugador') {
+    el.textContent = '🧑 Tu turno — pregunta o adivina';
+    el.style.color = '#e8b84b';
+  } else {
+    el.textContent = '🤖 Turno de la IA';
+    el.style.color = '#88bbff';
+  }
+}
+
+function actualizarCandidatosLabel() {
+  document.getElementById('lbl-candidatos').textContent =
+    `IA: ${iaCandidatos.length} cand.`;
+}
+
+// ── Popup ─────────────────────────────────────────────────────────────────────
+function mostrarPopup(pregunta, respuesta, esAfirmativa, cb) {
+  const inner = document.getElementById('popup-inner');
+  inner.style.background = esAfirmativa ? '#1a5c35' : '#5c1a1a';
+  document.getElementById('pop-preg').textContent = pregunta;
+  document.getElementById('pop-resp').textContent = esAfirmativa ? '✅ SÍ' : '❌ NO';
+  popupCallback = cb;
+  document.getElementById('popup').classList.add('visible');
+}
+
+function cerrarPopup() {
+  document.getElementById('popup').classList.remove('visible');
+  if (popupCallback) { popupCallback(); popupCallback = null; }
+}
+
+// ── Turno del jugador ─────────────────────────────────────────────────────────
+function jugadorPregunta() {
+  const attr = document.getElementById('sel-preg').value;
+  const txt  = PREGUNTAS.find(p => p.attr === attr).txt;
+  const resp = Boolean(iaSecreto[attr]);
+  mostrarPopup(txt, resp, resp, () => {
+    turno = 'ia';
+    actualizarTurnoLabel();
+    setTimeout(turnoIA, 400);
+  });
+}
+
+function jugadorAdivina() {
+  const nombre = document.getElementById('sel-adiv').value;
+  if (nombre === iaSecreto.n) {
+    winsJ++;
+    mostrarResultado(true,
+      `¡Correcto! Era ${iaSecreto.e} ${iaSecreto.n}`,
+      `El personaje de la IA era ${iaSecreto.n}.\nTu personaje secreto era ${miSecreto.e} ${miSecreto.n}.`);
+  } else {
+    winsIA++;
+    mostrarResultado(false,
+      `¡Incorrecto! Era ${iaSecreto.e} ${iaSecreto.n}`,
+      `Dijiste ${nombre} pero era ${iaSecreto.n}.\nTu personaje secreto era ${miSecreto.e} ${miSecreto.n}.`);
+  }
+}
+
+// ── IA ────────────────────────────────────────────────────────────────────────
+function mejorPreguntaIA() {
+  let mejor = Infinity, mejorAttr = null, mejorTxt = null;
+  for (const {txt, attr} of PREGUNTAS) {
+    if (iaHechas.has(attr)) continue;
+    const si  = iaCandidatos.filter(p => p[attr]).length;
+    const no  = iaCandidatos.length - si;
+    const peor = Math.max(si, no);
+    if (peor < mejor) { mejor = peor; mejorAttr = attr; mejorTxt = txt; }
+  }
+  return {txt: mejorTxt, attr: mejorAttr};
+}
+
+function turnoIA() {
+  if (!partidaActiva) return;
+
+  if (iaCandidatos.length === 1) {
+    const acierto = iaCandidatos[0].n === miSecreto.n;
+    if (acierto) {
+      winsIA++;
+      mostrarResultado(false,
+        `¡La IA adivinó! Eres ${miSecreto.e} ${miSecreto.n}`,
+        `El personaje de la IA era ${iaSecreto.e} ${iaSecreto.n}.`);
+    } else {
+      winsJ++;
+      mostrarResultado(true, '¡La IA se equivocó! 🎉',
+        `La IA dijo ${iaCandidatos[0].n} pero eras ${miSecreto.n}.\nEl personaje de la IA era ${iaSecreto.e} ${iaSecreto.n}.`);
+    }
+    return;
+  }
+
+  const {txt, attr} = mejorPreguntaIA();
+  if (!txt) { turnoIAAdivina(); return; }
+  iaHechas.add(attr);
+  iaPregActual = {txt, attr};
+  document.getElementById('lbl-preg-ia').textContent = txt;
+  mostrarPanel('ia');
+}
+
+function responderIA(resp) {
+  const {attr} = iaPregActual;
+  iaCandidatos = iaCandidatos.filter(p => Boolean(p[attr]) === resp);
+  actualizarCandidatosLabel();
+  turno = 'jugador';
+  actualizarTurnoLabel();
+  mostrarPanel('preg');
+}
+
+function turnoIAAdivina() {
+  if (!iaCandidatos.length) return;
+  const acierto = iaCandidatos[0].n === miSecreto.n;
+  if (acierto) {
+    winsIA++;
+    mostrarResultado(false,
+      `¡La IA adivinó! Eres ${miSecreto.e} ${miSecreto.n}`,
+      `El personaje de la IA era ${iaSecreto.e} ${iaSecreto.n}.`);
+  } else {
+    winsJ++;
+    mostrarResultado(true, '¡La IA se equivocó! 🎉',
+      `El personaje de la IA era ${iaSecreto.e} ${iaSecreto.n}.`);
+  }
+}
+
+// ── Resultado ─────────────────────────────────────────────────────────────────
+function mostrarResultado(ganaJugador, titulo, sub) {
+  partidaActiva = false;
+  document.getElementById('res-emoji').textContent  = ganaJugador ? '🏆' : '🤖';
+  document.getElementById('res-titulo').textContent = titulo;
+  document.getElementById('res-titulo').style.color = ganaJugador ? '#2ecc71' : '#e74c3c';
+  document.getElementById('res-sub').textContent    = sub;
+  irA('resultado');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+poblarSelectores();
+</script>
+</body>
+</html>
