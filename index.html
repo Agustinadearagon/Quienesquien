@@ -446,7 +446,7 @@
 </div>
 
 <script>
-const PERSONAJES = [
+var PERSONAJES = [
   {n:"Alex",    mujer:0,calvo:0,pb:0,pr:0,pp:0,pc:1,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
   {n:"Alfred",  mujer:0,calvo:0,pb:0,pr:0,pp:1,pc:0,gafas:0,barba:0,bigote:1,sombrero:0,azules:1},
   {n:"Anita",   mujer:1,calvo:0,pb:0,pr:1,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:1},
@@ -462,10 +462,10 @@ const PERSONAJES = [
   {n:"Miguel",  mujer:0,calvo:0,pb:0,pr:0,pp:0,pc:1,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
   {n:"Nuria",   mujer:1,calvo:0,pb:0,pr:0,pp:0,pc:1,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
   {n:"Richard", mujer:0,calvo:0,pb:0,pr:0,pp:1,pc:0,gafas:1,barba:0,bigote:1,sombrero:0,azules:1},
-  {n:"Susan",   mujer:1,calvo:0,pb:1,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:0},
+  {n:"Susan",   mujer:1,calvo:0,pb:1,pr:0,pp:0,pc:0,gafas:0,barba:0,bigote:0,sombrero:0,azules:0}
 ];
 
-const PREGUNTAS = [
+var PREGUNTAS = [
   {txt:"¿Es mujer?",               attr:"mujer"},
   {txt:"¿Es calvo/a?",             attr:"calvo"},
   {txt:"¿Tiene el pelo blanco?",   attr:"pb"},
@@ -476,116 +476,134 @@ const PREGUNTAS = [
   {txt:"¿Tiene barba?",            attr:"barba"},
   {txt:"¿Tiene bigote?",           attr:"bigote"},
   {txt:"¿Lleva sombrero?",         attr:"sombrero"},
-  {txt:"¿Tiene los ojos azules?",  attr:"azules"},
+  {txt:"¿Tiene los ojos azules?",  attr:"azules"}
 ];
 
 function caraSVG(p) {
-  const skin = p.mujer ? '#F5CBA7' : '#E8B88A';
-  const hairCol = p.calvo ? null :
-    p.pb ? '#D0D0D0' :
-    p.pr ? '#F4D03F' :
-    p.pp ? '#C0392B' :
-    '#6D4C41';
-  const eyeCol = p.azules ? '#2980B9' : '#4E342E';
-  const parts = [];
+  var skin = p.mujer ? "#F5CBA7" : "#E8B88A";
+  var hairCol = p.calvo ? null :
+    p.pb ? "#D0D0D0" :
+    p.pr ? "#F4D03F" :
+    p.pp ? "#C0392B" :
+    "#6D4C41";
+  var eyeCol = p.azules ? "#2980B9" : "#4E342E";
+  var parts = [];
 
-  parts.push(`<circle cx="40" cy="44" r="22" fill="${skin}"/>`);
+  parts.push('<circle cx="40" cy="44" r="22" fill="' + skin + '"/>');
 
   if (p.calvo) {
-    parts.push(`<ellipse cx="40" cy="28" rx="12" ry="5" fill="rgba(255,255,255,0.2)"/>`);
+    parts.push('<ellipse cx="40" cy="28" rx="12" ry="5" fill="rgba(255,255,255,0.2)"/>');
   } else if (p.mujer) {
-    parts.push(`<path d="M17 42 Q14 18 40 16 Q66 18 63 42 Q61 62 54 66 Q48 48 40 48 Q32 48 26 66 Q19 62 17 42Z" fill="${hairCol}"/>`);
-    parts.push(`<path d="M20 36 Q28 22 40 20 Q52 22 60 36 Q54 28 40 26 Q26 28 20 36Z" fill="${hairCol}"/>`);
+    parts.push('<path d="M17 42 Q14 18 40 16 Q66 18 63 42 Q61 62 54 66 Q48 48 40 48 Q32 48 26 66 Q19 62 17 42Z" fill="' + hairCol + '"/>');
+    parts.push('<path d="M20 36 Q28 22 40 20 Q52 22 60 36 Q54 28 40 26 Q26 28 20 36Z" fill="' + hairCol + '"/>');
   } else {
-    parts.push(`<path d="M19 42 Q17 20 40 16 Q63 20 61 42 Q56 28 40 26 Q24 28 19 42Z" fill="${hairCol}"/>`);
+    parts.push('<path d="M19 42 Q17 20 40 16 Q63 20 61 42 Q56 28 40 26 Q24 28 19 42Z" fill="' + hairCol + '"/>');
   }
 
-  parts.push(`<circle cx="32" cy="42" r="3.8" fill="#fff"/>`);
-  parts.push(`<circle cx="48" cy="42" r="3.8" fill="#fff"/>`);
-  parts.push(`<circle cx="32" cy="42" r="2.2" fill="${eyeCol}"/>`);
-  parts.push(`<circle cx="48" cy="42" r="2.2" fill="${eyeCol}"/>`);
+  parts.push('<circle cx="32" cy="42" r="3.8" fill="#fff"/>');
+  parts.push('<circle cx="48" cy="42" r="3.8" fill="#fff"/>');
+  parts.push('<circle cx="32" cy="42" r="2.2" fill="' + eyeCol + '"/>');
+  parts.push('<circle cx="48" cy="42" r="2.2" fill="' + eyeCol + '"/>');
 
   if (p.gafas) {
-    parts.push(`<circle cx="32" cy="42" r="6.5" fill="none" stroke="#222" stroke-width="1.8"/>`);
-    parts.push(`<circle cx="48" cy="42" r="6.5" fill="none" stroke="#222" stroke-width="1.8"/>`);
-    parts.push(`<line x1="38.5" y1="42" x2="41.5" y2="42" stroke="#222" stroke-width="1.8"/>`);
-    parts.push(`<line x1="25.5" y1="42" x2="20" y2="40" stroke="#222" stroke-width="1.5"/>`);
-    parts.push(`<line x1="54.5" y1="42" x2="60" y2="40" stroke="#222" stroke-width="1.5"/>`);
+    parts.push('<circle cx="32" cy="42" r="6.5" fill="none" stroke="#222" stroke-width="1.8"/>');
+    parts.push('<circle cx="48" cy="42" r="6.5" fill="none" stroke="#222" stroke-width="1.8"/>');
+    parts.push('<line x1="38.5" y1="42" x2="41.5" y2="42" stroke="#222" stroke-width="1.8"/>');
+    parts.push('<line x1="25.5" y1="42" x2="20" y2="40" stroke="#222" stroke-width="1.5"/>');
+    parts.push('<line x1="54.5" y1="42" x2="60" y2="40" stroke="#222" stroke-width="1.5"/>');
   }
 
-  parts.push(`<ellipse cx="40" cy="49" rx="2.2" ry="2.8" fill="#D4A07A"/>`);
-  parts.push(`<path d="M34 56 Q40 60 46 56" fill="none" stroke="#C07060" stroke-width="1.6" stroke-linecap="round"/>`);
+  parts.push('<ellipse cx="40" cy="49" rx="2.2" ry="2.8" fill="#D4A07A"/>');
+  parts.push('<path d="M34 56 Q40 60 46 56" fill="none" stroke="#C07060" stroke-width="1.6" stroke-linecap="round"/>');
 
   if (p.bigote) {
-    parts.push(`<path d="M29 52 Q40 57 51 52 Q46 54 40 54.5 Q34 54 29 52Z" fill="#5D4037"/>`);
+    parts.push('<path d="M29 52 Q40 57 51 52 Q46 54 40 54.5 Q34 54 29 52Z" fill="#5D4037"/>');
   }
 
   if (p.barba) {
-    parts.push(`<path d="M24 54 Q27 70 40 72 Q53 70 56 54 Q49 62 40 62 Q31 62 24 54Z" fill="#5D4037"/>`);
+    parts.push('<path d="M24 54 Q27 70 40 72 Q53 70 56 54 Q49 62 40 62 Q31 62 24 54Z" fill="#5D4037"/>');
   }
 
   if (p.sombrero) {
-    parts.push(`<ellipse cx="40" cy="18" rx="28" ry="6" fill="#2C3E50"/>`);
-    parts.push(`<rect x="25" y="5" width="30" height="15" rx="3" fill="#2C3E50"/>`);
+    parts.push('<ellipse cx="40" cy="18" rx="28" ry="6" fill="#2C3E50"/>');
+    parts.push('<rect x="25" y="5" width="30" height="15" rx="3" fill="#2C3E50"/>');
   }
 
-  return `<svg class="cara-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
+  return '<svg class="cara-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">' + parts.join("") + "</svg>";
 }
 
-let miSecreto, iaSecreto, miTablero, iaCandidatos, iaHechas;
-let turno, partidaActiva, winsJ = 0, winsIA = 0;
-let popupCallback = null;
-let iaPregActual  = null;
+var miSecreto, iaSecreto, miTablero, iaCandidatos, iaHechas;
+var turno, partidaActiva, winsJ = 0, winsIA = 0;
+var popupCallback = null;
+var iaPregActual = null;
 
 function irA(dest) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(dest).classList.add('active');
-  if (dest === 'menu') actualizarStatsMenu();
+  var screens = document.querySelectorAll(".screen");
+  for (var i = 0; i < screens.length; i++) {
+    screens[i].classList.remove("active");
+  }
+  document.getElementById(dest).classList.add("active");
+  if (dest === "menu") actualizarStatsMenu();
 }
 
 function actualizarStatsMenu() {
-  const total = winsJ + winsIA;
-  document.getElementById('stats-menu').textContent =
-    total === 0 ? 'Sin partidas aún'
-                : `Partidas: ${total}   🧑 Tú: ${winsJ}   🤖 IA: ${winsIA}`;
+  var total = winsJ + winsIA;
+  document.getElementById("stats-menu").textContent =
+    total === 0 ? "Sin partidas aún"
+                : "Partidas: " + total + "   Tú: " + winsJ + "   IA: " + winsIA;
 }
 
 function poblarSelectores() {
-  const sp = document.getElementById('sel-preg');
-  sp.innerHTML = PREGUNTAS.map(p => `<option value="\( {p.attr}"> \){p.txt}</option>`).join('');
+  var sp = document.getElementById("sel-preg");
+  var htmlPreg = "";
+  for (var i = 0; i < PREGUNTAS.length; i++) {
+    htmlPreg += '<option value="' + PREGUNTAS[i].attr + '">' + PREGUNTAS[i].txt + "</option>";
+  }
+  sp.innerHTML = htmlPreg;
 
-  const sa = document.getElementById('sel-adiv');
-  sa.innerHTML = PERSONAJES.map(p => `<option value="\( {p.n}"> \){p.n}</option>`).join('');
+  var sa = document.getElementById("sel-adiv");
+  var htmlAdiv = "";
+  for (var j = 0; j < PERSONAJES.length; j++) {
+    htmlAdiv += '<option value="' + PERSONAJES[j].n + '">' + PERSONAJES[j].n + "</option>";
+  }
+  sa.innerHTML = htmlAdiv;
 }
 
 function nuevaPartida() {
-  miSecreto    = PERSONAJES[Math.floor(Math.random() * PERSONAJES.length)];
-  iaSecreto    = PERSONAJES[Math.floor(Math.random() * PERSONAJES.length)];
-  miTablero    = PERSONAJES.map(p => ({ p, activa: true }));
-  iaCandidatos = [...PERSONAJES];
-  iaHechas     = new Set();
-  turno        = 'jugador';
+  miSecreto = PERSONAJES[Math.floor(Math.random() * PERSONAJES.length)];
+  iaSecreto = PERSONAJES[Math.floor(Math.random() * PERSONAJES.length)];
+  miTablero = [];
+  for (var i = 0; i < PERSONAJES.length; i++) {
+    miTablero.push({ p: PERSONAJES[i], activa: true });
+  }
+  iaCandidatos = PERSONAJES.slice();
+  iaHechas = {};
+  turno = "jugador";
   partidaActiva = true;
 
-  document.getElementById('lbl-secreto').innerHTML =
-    caraSVG(miSecreto) + ' <span>' + miSecreto.n + '</span>';
+  document.getElementById("lbl-secreto").innerHTML =
+    caraSVG(miSecreto) + " <span>" + miSecreto.n + "</span>";
   actualizarCandidatosLabel();
   actualizarTurnoLabel();
   poblarSelectores();
   dibujarTablero();
-  mostrarPanel('preg');
-  irA('juego');
+  mostrarPanel("preg");
+  irA("juego");
 }
 
 function dibujarTablero() {
-  const el = document.getElementById('tablero');
-  el.innerHTML = miTablero.map((e, i) => `
-    <div class="tarjeta \( {e.activa ? '' : 'eliminada'}" onclick="toggleTarjeta( \){i})">
-      ${caraSVG(e.p)}
-      <div class="nombre">${e.p.n}</div>
-      <div class="cruz"></div>
-    </div>
-  `).join('');
+  var el = document.getElementById("tablero");
+  var html = "";
+  for (var i = 0; i < miTablero.length; i++) {
+    var e = miTablero[i];
+    var clase = e.activa ? "tarjeta" : "tarjeta eliminada";
+    html += '<div class="' + clase + '" onclick="toggleTarjeta(' + i + ')">';
+    html += caraSVG(e.p);
+    html += '<div class="nombre">' + e.p.n + "</div>";
+    html += '<div class="cruz"></div>';
+    html += "</div>";
+  }
+  el.innerHTML = html;
 }
 
 function toggleTarjeta(i) {
@@ -595,147 +613,180 @@ function toggleTarjeta(i) {
 }
 
 function levantarTodo() {
-  miTablero.forEach(e => e.activa = true);
+  for (var i = 0; i < miTablero.length; i++) {
+    miTablero[i].activa = true;
+  }
   dibujarTablero();
 }
 
 function mostrarPanel(cual) {
-  ['preg','adiv','ia'].forEach(id =>
-    document.getElementById('panel-'+id).classList.remove('visible'));
-  document.getElementById('panel-'+cual).classList.add('visible');
+  var ids = ["preg", "adiv", "ia"];
+  for (var i = 0; i < ids.length; i++) {
+    document.getElementById("panel-" + ids[i]).classList.remove("visible");
+  }
+  document.getElementById("panel-" + cual).classList.add("visible");
 }
 
 function actualizarTurnoLabel() {
-  const el = document.getElementById('lbl-turno');
-  if (turno === 'jugador') {
-    el.textContent = '🧑 Tu turno — pregunta o adivina';
-    el.style.color = '#e8b84b';
+  var el = document.getElementById("lbl-turno");
+  if (turno === "jugador") {
+    el.textContent = "Tu turno — pregunta o adivina";
+    el.style.color = "#e8b84b";
   } else {
-    el.textContent = '🤖 Turno de la IA';
-    el.style.color = '#88bbff';
+    el.textContent = "Turno de la IA";
+    el.style.color = "#88bbff";
   }
 }
 
 function actualizarCandidatosLabel() {
-  document.getElementById('lbl-candidatos').textContent =
-    `IA: ${iaCandidatos.length} cand.`;
+  document.getElementById("lbl-candidatos").textContent =
+    "IA: " + iaCandidatos.length + " cand.";
 }
 
-function mostrarPopup(pregunta, respuesta, esAfirmativa, cb) {
-  const inner = document.getElementById('popup-inner');
-  inner.style.background = esAfirmativa ? '#1a5c35' : '#5c1a1a';
-  document.getElementById('pop-preg').textContent = pregunta;
-  document.getElementById('pop-resp').textContent = esAfirmativa ? '✅ SÍ' : '❌ NO';
+function mostrarPopup(pregunta, esAfirmativa, cb) {
+  var inner = document.getElementById("popup-inner");
+  inner.style.background = esAfirmativa ? "#1a5c35" : "#5c1a1a";
+  document.getElementById("pop-preg").textContent = pregunta;
+  document.getElementById("pop-resp").textContent = esAfirmativa ? "✅ SÍ" : "❌ NO";
   popupCallback = cb;
-  document.getElementById('popup').classList.add('visible');
+  document.getElementById("popup").classList.add("visible");
 }
 
 function cerrarPopup() {
-  document.getElementById('popup').classList.remove('visible');
-  if (popupCallback) { popupCallback(); popupCallback = null; }
+  document.getElementById("popup").classList.remove("visible");
+  if (popupCallback) {
+    popupCallback();
+    popupCallback = null;
+  }
 }
 
 function jugadorPregunta() {
-  const attr = document.getElementById('sel-preg').value;
-  const txt  = PREGUNTAS.find(p => p.attr === attr).txt;
-  const resp = Boolean(iaSecreto[attr]);
-  mostrarPopup(txt, resp, resp, () => {
-    turno = 'ia';
+  var attr = document.getElementById("sel-preg").value;
+  var txt = "";
+  for (var i = 0; i < PREGUNTAS.length; i++) {
+    if (PREGUNTAS[i].attr === attr) {
+      txt = PREGUNTAS[i].txt;
+      break;
+    }
+  }
+  var resp = Boolean(iaSecreto[attr]);
+  mostrarPopup(txt, resp, function() {
+    turno = "ia";
     actualizarTurnoLabel();
     setTimeout(turnoIA, 400);
   });
 }
 
 function jugadorAdivina() {
-  const nombre = document.getElementById('sel-adiv').value;
+  var nombre = document.getElementById("sel-adiv").value;
   if (nombre === iaSecreto.n) {
     winsJ++;
     mostrarResultado(true,
-      `¡Correcto! Era ${iaSecreto.n}`,
-      `El personaje de la IA era ${iaSecreto.n}.\nTu personaje secreto era ${miSecreto.n}.`);
+      "¡Correcto! Era " + iaSecreto.n,
+      "El personaje de la IA era " + iaSecreto.n + ".\nTu personaje secreto era " + miSecreto.n + ".");
   } else {
     winsIA++;
     mostrarResultado(false,
-      `¡Incorrecto! Era ${iaSecreto.n}`,
-      `Dijiste ${nombre} pero era ${iaSecreto.n}.\nTu personaje secreto era ${miSecreto.n}.`);
+      "¡Incorrecto! Era " + iaSecreto.n,
+      "Dijiste " + nombre + " pero era " + iaSecreto.n + ".\nTu personaje secreto era " + miSecreto.n + ".");
   }
 }
 
 function mejorPreguntaIA() {
-  let mejor = Infinity, mejorAttr = null, mejorTxt = null;
-  for (const {txt, attr} of PREGUNTAS) {
-    if (iaHechas.has(attr)) continue;
-    const si  = iaCandidatos.filter(p => p[attr]).length;
-    const no  = iaCandidatos.length - si;
-    const peor = Math.max(si, no);
-    if (peor < mejor) { mejor = peor; mejorAttr = attr; mejorTxt = txt; }
+  var mejor = Infinity;
+  var mejorAttr = null;
+  var mejorTxt = null;
+  for (var i = 0; i < PREGUNTAS.length; i++) {
+    var txt = PREGUNTAS[i].txt;
+    var attr = PREGUNTAS[i].attr;
+    if (iaHechas[attr]) continue;
+    var si = 0;
+    for (var j = 0; j < iaCandidatos.length; j++) {
+      if (iaCandidatos[j][attr]) si++;
+    }
+    var no = iaCandidatos.length - si;
+    var peor = Math.max(si, no);
+    if (peor < mejor) {
+      mejor = peor;
+      mejorAttr = attr;
+      mejorTxt = txt;
+    }
   }
-  return {txt: mejorTxt, attr: mejorAttr};
+  return { txt: mejorTxt, attr: mejorAttr };
 }
 
 function turnoIA() {
   if (!partidaActiva) return;
 
   if (iaCandidatos.length === 1) {
-    const acierto = iaCandidatos[0].n === miSecreto.n;
+    var acierto = iaCandidatos[0].n === miSecreto.n;
     if (acierto) {
       winsIA++;
       mostrarResultado(false,
-        `¡La IA adivinó! Eres ${miSecreto.n}`,
-        `El personaje de la IA era ${iaSecreto.n}.`);
+        "¡La IA adivinó! Eres " + miSecreto.n,
+        "El personaje de la IA era " + iaSecreto.n + ".");
     } else {
       winsJ++;
-      mostrarResultado(true, '¡La IA se equivocó! 🎉',
-        `La IA dijo ${iaCandidatos[0].n} pero eras ${miSecreto.n}.\nEl personaje de la IA era ${iaSecreto.n}.`);
+      mostrarResultado(true, "¡La IA se equivocó!",
+        "La IA dijo " + iaCandidatos[0].n + " pero eras " + miSecreto.n + ".\nEl personaje de la IA era " + iaSecreto.n + ".");
     }
     return;
   }
 
-  const {txt, attr} = mejorPreguntaIA();
-  if (!txt) { turnoIAAdivina(); return; }
-  iaHechas.add(attr);
-  iaPregActual = {txt, attr};
-  document.getElementById('lbl-preg-ia').textContent = txt;
-  mostrarPanel('ia');
+  var preg = mejorPreguntaIA();
+  if (!preg.txt) {
+    turnoIAAdivina();
+    return;
+  }
+  iaHechas[preg.attr] = true;
+  iaPregActual = preg;
+  document.getElementById("lbl-preg-ia").textContent = preg.txt;
+  mostrarPanel("ia");
 }
 
 function responderIA(resp) {
-  const {attr} = iaPregActual;
-  iaCandidatos = iaCandidatos.filter(p => Boolean(p[attr]) === resp);
+  var attr = iaPregActual.attr;
+  var nuevos = [];
+  for (var i = 0; i < iaCandidatos.length; i++) {
+    if (Boolean(iaCandidatos[i][attr]) === resp) {
+      nuevos.push(iaCandidatos[i]);
+    }
+  }
+  iaCandidatos = nuevos;
   actualizarCandidatosLabel();
-  turno = 'jugador';
+  turno = "jugador";
   actualizarTurnoLabel();
-  mostrarPanel('preg');
+  mostrarPanel("preg");
 }
 
 function turnoIAAdivina() {
   if (!iaCandidatos.length) return;
-  const acierto = iaCandidatos[0].n === miSecreto.n;
+  var acierto = iaCandidatos[0].n === miSecreto.n;
   if (acierto) {
     winsIA++;
     mostrarResultado(false,
-      `¡La IA adivinó! Eres ${miSecreto.n}`,
-      `El personaje de la IA era ${iaSecreto.n}.`);
+      "¡La IA adivinó! Eres " + miSecreto.n,
+      "El personaje de la IA era " + iaSecreto.n + ".");
   } else {
     winsJ++;
-    mostrarResultado(true, '¡La IA se equivocó! 🎉',
-      `El personaje de la IA era ${iaSecreto.n}.`);
+    mostrarResultado(true, "¡La IA se equivocó!",
+      "El personaje de la IA era " + iaSecreto.n + ".");
   }
 }
 
 function mostrarResultado(ganaJugador, titulo, sub) {
   partidaActiva = false;
-  document.getElementById('res-emoji').textContent  = ganaJugador ? '🏆' : '🤖';
-  document.getElementById('res-titulo').textContent = titulo;
-  document.getElementById('res-titulo').style.color = ganaJugador ? '#2ecc71' : '#e74c3c';
-  document.getElementById('res-sub').textContent    = sub;
-  irA('resultado');
+  document.getElementById("res-emoji").textContent = ganaJugador ? "🏆" : "🤖";
+  document.getElementById("res-titulo").textContent = titulo;
+  document.getElementById("res-titulo").style.color = ganaJugador ? "#2ecc71" : "#e74c3c";
+  document.getElementById("res-sub").textContent = sub;
+  irA("resultado");
 }
 
 poblarSelectores();
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js").catch(function() {});
 }
 </script>
 </body>
