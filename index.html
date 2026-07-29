@@ -176,6 +176,7 @@
       position: relative;
       aspect-ratio: 3/4;
       user-select: none;
+      overflow: hidden;
     }
     .tarjeta:active { transform: scale(.95); }
 
@@ -184,9 +185,12 @@
       border-color: #6a3030;
       opacity: .7;
     }
-    .tarjeta .cara-svg {
-      width: clamp(42px, 13vw, 60px);
-      height: clamp(42px, 13vw, 60px);
+    .tarjeta .cara-img {
+      width: 85%;
+      height: auto;
+      max-height: 70%;
+      object-fit: contain;
+      border-radius: 6px;
       flex-shrink: 0;
     }
     .tarjeta .nombre {
@@ -242,9 +246,11 @@
       font-weight: bold;
       color: var(--acento);
     }
-    #lbl-secreto .cara-svg {
-      width: 34px;
-      height: 34px;
+    #lbl-secreto .cara-img {
+      width: 36px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 6px;
     }
 
     .panel {
@@ -351,7 +357,6 @@
 </head>
 <body>
 
-<!-- MENÚ -->
 <div id="menu" class="screen active">
   <div class="menu-header">
     <h1>🕵️ ¿Quién es Quién?</h1>
@@ -374,7 +379,6 @@
   <div style="height:16px"></div>
 </div>
 
-<!-- JUEGO -->
 <div id="juego" class="screen">
 
   <div class="juego-header">
@@ -424,7 +428,6 @@
 
 </div>
 
-<!-- RESULTADO -->
 <div id="resultado" class="screen">
   <div id="res-emoji"></div>
   <div id="res-titulo"></div>
@@ -436,7 +439,6 @@
   </div>
 </div>
 
-<!-- POPUP -->
 <div id="popup">
   <div class="popup-inner" id="popup-inner">
     <div class="pop-pregunta" id="pop-preg"></div>
@@ -479,57 +481,8 @@ var PREGUNTAS = [
   {txt:"¿Tiene los ojos azules?",  attr:"azules"}
 ];
 
-function caraSVG(p) {
-  var skin = p.mujer ? "#F5CBA7" : "#E8B88A";
-  var hairCol = p.calvo ? null :
-    p.pb ? "#D0D0D0" :
-    p.pr ? "#F4D03F" :
-    p.pp ? "#C0392B" :
-    "#6D4C41";
-  var eyeCol = p.azules ? "#2980B9" : "#4E342E";
-  var parts = [];
-
-  parts.push('<circle cx="40" cy="44" r="22" fill="' + skin + '"/>');
-
-  if (p.calvo) {
-    parts.push('<ellipse cx="40" cy="28" rx="12" ry="5" fill="rgba(255,255,255,0.2)"/>');
-  } else if (p.mujer) {
-    parts.push('<path d="M17 42 Q14 18 40 16 Q66 18 63 42 Q61 62 54 66 Q48 48 40 48 Q32 48 26 66 Q19 62 17 42Z" fill="' + hairCol + '"/>');
-    parts.push('<path d="M20 36 Q28 22 40 20 Q52 22 60 36 Q54 28 40 26 Q26 28 20 36Z" fill="' + hairCol + '"/>');
-  } else {
-    parts.push('<path d="M19 42 Q17 20 40 16 Q63 20 61 42 Q56 28 40 26 Q24 28 19 42Z" fill="' + hairCol + '"/>');
-  }
-
-  parts.push('<circle cx="32" cy="42" r="3.8" fill="#fff"/>');
-  parts.push('<circle cx="48" cy="42" r="3.8" fill="#fff"/>');
-  parts.push('<circle cx="32" cy="42" r="2.2" fill="' + eyeCol + '"/>');
-  parts.push('<circle cx="48" cy="42" r="2.2" fill="' + eyeCol + '"/>');
-
-  if (p.gafas) {
-    parts.push('<circle cx="32" cy="42" r="6.5" fill="none" stroke="#222" stroke-width="1.8"/>');
-    parts.push('<circle cx="48" cy="42" r="6.5" fill="none" stroke="#222" stroke-width="1.8"/>');
-    parts.push('<line x1="38.5" y1="42" x2="41.5" y2="42" stroke="#222" stroke-width="1.8"/>');
-    parts.push('<line x1="25.5" y1="42" x2="20" y2="40" stroke="#222" stroke-width="1.5"/>');
-    parts.push('<line x1="54.5" y1="42" x2="60" y2="40" stroke="#222" stroke-width="1.5"/>');
-  }
-
-  parts.push('<ellipse cx="40" cy="49" rx="2.2" ry="2.8" fill="#D4A07A"/>');
-  parts.push('<path d="M34 56 Q40 60 46 56" fill="none" stroke="#C07060" stroke-width="1.6" stroke-linecap="round"/>');
-
-  if (p.bigote) {
-    parts.push('<path d="M29 52 Q40 57 51 52 Q46 54 40 54.5 Q34 54 29 52Z" fill="#5D4037"/>');
-  }
-
-  if (p.barba) {
-    parts.push('<path d="M24 54 Q27 70 40 72 Q53 70 56 54 Q49 62 40 62 Q31 62 24 54Z" fill="#5D4037"/>');
-  }
-
-  if (p.sombrero) {
-    parts.push('<ellipse cx="40" cy="18" rx="28" ry="6" fill="#2C3E50"/>');
-    parts.push('<rect x="25" y="5" width="30" height="15" rx="3" fill="#2C3E50"/>');
-  }
-
-  return '<svg class="cara-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">' + parts.join("") + "</svg>";
+function caraImg(nombre) {
+  return '<img class="cara-img" src="' + nombre + '.png" alt="' + nombre + '" onerror="this.src=\'' + nombre + '.jpg\'"/>';
 }
 
 var miSecreto, iaSecreto, miTablero, iaCandidatos, iaHechas;
@@ -582,7 +535,7 @@ function nuevaPartida() {
   partidaActiva = true;
 
   document.getElementById("lbl-secreto").innerHTML =
-    caraSVG(miSecreto) + " <span>" + miSecreto.n + "</span>";
+    caraImg(miSecreto.n) + " <span>" + miSecreto.n + "</span>";
   actualizarCandidatosLabel();
   actualizarTurnoLabel();
   poblarSelectores();
@@ -598,7 +551,7 @@ function dibujarTablero() {
     var e = miTablero[i];
     var clase = e.activa ? "tarjeta" : "tarjeta eliminada";
     html += '<div class="' + clase + '" onclick="toggleTarjeta(' + i + ')">';
-    html += caraSVG(e.p);
+    html += caraImg(e.p.n);
     html += '<div class="nombre">' + e.p.n + "</div>";
     html += '<div class="cruz"></div>';
     html += "</div>";
